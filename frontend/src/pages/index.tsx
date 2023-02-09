@@ -2,7 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
-import io from "socket.io-client";
+import io, { Socket } from "socket.io-client";
 import { api } from "../utils/api";
 import {
   ChangeEvent,
@@ -12,44 +12,39 @@ import {
   useState,
 } from "react";
 
-const socket = io("http://localhost:5000");
-
 const Home: NextPage = () => {
-  const [connected, setConnected]: [
-    boolean,
-    Dispatch<SetStateAction<boolean>>
-  ] = useState(false);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [userInput, setUserInput] = useState<string>("");
   const [correct, setCorrect] = useState<boolean>(false);
 
   useEffect(() => {
+    const connect = io("http://localhost:5000") ?? null;
     //Trigger on connect
-    socket.on("connect", () => {
-      setConnected(true);
+    connect.on("connect", () => {
+      setSocket(connect);
     });
 
     //Trigger on disconnect
-    socket.on("disconnect", () => {
-      setConnected(false);
+    connect.on("disconnect", () => {
+      setSocket(null);
     });
 
     //Trigger when sent correct
-    socket.on("correct", () => {
+    connect.on("correct", () => {
       setCorrect(true);
     });
 
     return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off("correct");
-      socket.off("userInput");
+      connect.disconnect();
     };
-  });
+  }, []);
 
   useEffect(() => {
     //Send user input to server for validation
-    socket.emit("userInput", userInput);
-  }, [userInput]);
+    if (socket) {
+      socket.emit("userInput", userInput);
+    }
+  }, [socket, userInput]);
 
   return (
     <>
@@ -59,7 +54,7 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="flex flex-col flex-wrap p-8">
-        <p>{`Connected: ${connected ? "👍" : "👎"}`}</p>
+        <p>{`Connected: ${socket ? "👍" : "👎"}`}</p>
         <h1>{correct ? "🎉" : null}</h1>
         <label htmlFor="text">Input</label>
         <input

@@ -5,10 +5,16 @@ import fs from "fs";
 import { Server } from "socket.io";
 import http from "http";
 import cors from "cors";
+import { instrument } from "@socket.io/admin-ui";
+import { auth, requiresAuth } from "express-openid-connect";
+
 const app = express(); //Instantiate app
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" },
+  cors: {
+    origin: ["http://localhost:3000", "https://admin.socket.io"],
+    credentials: true,
+  },
 });
 interface WordList {
   words: Array<string>;
@@ -18,11 +24,37 @@ const words: any = fs.readFileSync("words.json");
 const parsed: WordList = JSON.parse(words);
 
 dotenv.config(); // Initialize env
-app.use(cors());
+app.use(cors({ origin: ["http://localhost:3000", "https://admin.socket.io"] }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(
+  auth({
+    authRequired: false,
+    auth0Logout: true,
+    idpLogout: true,
+    issuerBaseURL: process.env.ISSUER_BASE_URL,
+    baseURL: process.env.BASE_URL,
+    clientID: process.env.CLIENT_ID,
+    secret: process.env.AUTH_SECRET,
+  })
+);
+
+app.use("/", (req, res) => {
+  res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
+});
+
+app.use("/profile", requiresAuth(), async (req, res) => {
+  console.log(colors.bgBlue(JSON.stringify(await req.oidc.fetchUserInfo())));
+  res.send(JSON.stringify(await req.oidc.fetchUserInfo()));
+});
 
 io.on("connection", function (socket) {
+  setInterval(
+    () =>
+      console.log(colors.bgYellow(`Connected to socket with ID: ${socket.id}`)),
+    5000
+  );
+
   socket.on("disconnect", (reason) => {
     console.log(`socket ${socket.id} disconnected due to ${reason}`);
   });
@@ -56,3 +88,5 @@ function handleUserInput(input: string): boolean {
 server.listen(process.env.PORT, () => {
   console.log(colors.bgGreen(`Server running on PORT: ${process.env.PORT}`));
 });
+
+instrument(io, { auth: false });
