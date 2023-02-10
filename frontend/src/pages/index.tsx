@@ -57,6 +57,7 @@ const Home: NextPage = () => {
         <p>{`Connected: ${socket ? "👍" : "👎"}`}</p>
         <h1>{correct ? "🎉" : null}</h1>
         <label htmlFor="text">Input</label>
+        <h2>Hej hej</h2>
         <input
           type="text"
           name="text"
