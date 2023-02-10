@@ -53,7 +53,7 @@ app.use("/profile", (0, express_openid_connect_1.requiresAuth)(), (req, res) => 
     res.send(JSON.stringify(yield req.oidc.fetchUserInfo()));
 }));
 io.on("connection", function (socket) {
-    setInterval(() => console.log(colors_1.default.bgYellow(`Connected to socket with ID: ${socket.id}`)), 5000);
+    setInterval(() => console.log(colors_1.default.bgYellow(`Connected to socket with ID: ${socket.id}`)), 60000);
     socket.on("disconnect", (reason) => {
         console.log(`socket ${socket.id} disconnected due to ${reason}`);
     });
@@ -79,6 +79,6 @@ function handleUserInput(input) {
     return false;
 }
 server.listen(process.env.PORT, () => {
-    console.log(colors_1.default.bgGreen(`Server running on PORT: ${process.env.PORT}`));
+    console.log(colors_1.default.bgGreen(`Server running on PORT: ${process.env.PORT} `));
 });
 (0, admin_ui_1.instrument)(io, { auth: false });

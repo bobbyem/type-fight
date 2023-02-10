@@ -52,7 +52,7 @@ io.on("connection", function (socket) {
   setInterval(
     () =>
       console.log(colors.bgYellow(`Connected to socket with ID: ${socket.id}`)),
-    5000
+    60000
   );
 
   socket.on("disconnect", (reason) => {
@@ -86,7 +86,7 @@ function handleUserInput(input: string): boolean {
 }
 
 server.listen(process.env.PORT, () => {
-  console.log(colors.bgGreen(`Server running on PORT: ${process.env.PORT}`));
+  console.log(colors.bgGreen(`Server running on PORT: ${process.env.PORT} `));
 });
 
 instrument(io, { auth: false });
