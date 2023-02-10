@@ -16,9 +16,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-interface WordList {
-  words: Array<string>;
-}
+
 const word = "Måndag";
 const words: any = fs.readFileSync("words.json");
 const parsed: WordList = JSON.parse(words);
