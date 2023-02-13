@@ -1,50 +1,34 @@
 import express from "express";
-import dotenv from "dotenv";
 import colors from "colors";
 import fs from "fs";
 import { Server } from "socket.io";
 import http from "http";
 import cors from "cors";
+import cookieParser from "cookie-parser"
 import { instrument } from "@socket.io/admin-ui";
-import { auth, requiresAuth } from "express-openid-connect";
+import { router } from "./router/router";
+import env from "./env/env"
+import { connectDB} from "./db/db";
 
 const app = express(); //Instantiate app
 const server = http.createServer(app);
+const allowedOrigins = ["http://localhost:3000", "https://admin.socket.io", "https://type-fight.vercel.app/"]
 const io = new Server(server, {
-  cors: {
-    origin: ["http://localhost:3000", "https://admin.socket.io"],
+  cors: {origin: allowedOrigins
+    ,
     credentials: true,
   },
 });
 
-const word = "Måndag";
-const words: any = fs.readFileSync("words.json");
-const parsed: WordList = JSON.parse(words);
+connectDB(); //Connect to the mongodb database 
 
-dotenv.config(); // Initialize env
-app.use(cors({ origin: ["http://localhost:3000", "https://admin.socket.io"] }));
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  auth({
-    authRequired: false,
-    auth0Logout: true,
-    idpLogout: true,
-    issuerBaseURL: process.env.ISSUER_BASE_URL,
-    baseURL: process.env.BASE_URL,
-    clientID: process.env.CLIENT_ID,
-    secret: process.env.AUTH_SECRET,
-  })
-);
+app.use(cookieParser());
 
-app.use("/", (req, res) => {
-  res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
-});
 
-app.use("/profile", requiresAuth(), async (req, res) => {
-  console.log(colors.bgBlue(JSON.stringify(await req.oidc.fetchUserInfo())));
-  res.send(JSON.stringify(await req.oidc.fetchUserInfo()));
-});
+app.use("/", router);
 
 io.on("connection", function (socket) {
   setInterval(
@@ -63,28 +47,11 @@ io.on("connection", function (socket) {
       data: "Pong";
     });
   });
-
-  socket.on("userInput", (userInput) => {
-    console.log(userInput);
-
-    if (handleUserInput(userInput)) {
-      console.log(colors.rainbow(`User: ${socket.id} was correct`));
-      return io.emit("correct");
-    }
-  });
 });
 
-console.log(parsed.words[5]);
-
-function handleUserInput(input: string): boolean {
-  if (input === word) {
-    return true;
-  }
-  return false;
-}
 
 server.listen(process.env.PORT, () => {
-  console.log(colors.bgGreen(`Server running on PORT: ${process.env.PORT} `));
+  console.log(colors.bgGreen(`Server running on PORT: ${env.port} `));
 });
 
 instrument(io, { auth: false });

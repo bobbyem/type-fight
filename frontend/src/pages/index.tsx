@@ -11,6 +11,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { urls } from "../utils/url";
 
 const Home: NextPage = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -18,7 +19,7 @@ const Home: NextPage = () => {
   const [correct, setCorrect] = useState<boolean>(false);
 
   useEffect(() => {
-    const connect = io("http://localhost:5000") ?? null;
+    const connect = io(urls.api) ?? null;
     //Trigger on connect
     connect.on("connect", () => {
       setSocket(connect);

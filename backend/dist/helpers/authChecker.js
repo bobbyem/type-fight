@@ -12,21 +12,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.wordGetter = void 0;
-const fs_1 = __importDefault(require("fs"));
-function wordGetter(complexity) {
+exports.authChecker = void 0;
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const env_1 = __importDefault(require("../env/env"));
+function authChecker(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const file = yield fs_1.default.readFileSync("./words/words.json");
-            const parsed = JSON.parse(file);
-            const words = parsed.words;
-            const filteredWords = words.filter(word => word.length === complexity);
-            const word = filteredWords[Math.floor(Math.random() * filteredWords.length)];
-            return word;
-        }
-        catch (error) {
-            console.error(error);
-        }
+        const { _tfToken: token } = req.cookies;
+        if (token == null)
+            return res.sendStatus(401);
+        jsonwebtoken_1.default.verify(token, env_1.default.jwt_secret, (err, user) => {
+            console.log(err);
+            if (err)
+                return res.sendStatus(403);
+            req.user = user;
+            next();
+        });
     });
 }
-exports.wordGetter = wordGetter;
+exports.authChecker = authChecker;

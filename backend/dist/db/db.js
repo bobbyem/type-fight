@@ -12,21 +12,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.wordGetter = void 0;
-const fs_1 = __importDefault(require("fs"));
-function wordGetter(complexity) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const file = yield fs_1.default.readFileSync("./words/words.json");
-            const parsed = JSON.parse(file);
-            const words = parsed.words;
-            const filteredWords = words.filter(word => word.length === complexity);
-            const word = filteredWords[Math.floor(Math.random() * filteredWords.length)];
-            return word;
-        }
-        catch (error) {
-            console.error(error);
-        }
-    });
-}
-exports.wordGetter = wordGetter;
+exports.connectDB = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
+const env_1 = __importDefault(require("../env/env"));
+const colors_1 = __importDefault(require("colors"));
+const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const connect = yield mongoose_1.default.connect((_a = env_1.default.mongo_url) !== null && _a !== void 0 ? _a : "", {
+            dbName: "typefight"
+        });
+        console.log(colors_1.default.bgGreen(`Connected to DB url: ${connect.connection.host}`));
+    }
+    catch (error) {
+        console.log(colors_1.default.bgRed(error));
+    }
+});
+exports.connectDB = connectDB;
