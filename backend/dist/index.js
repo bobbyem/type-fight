@@ -15,13 +15,15 @@ const env_1 = __importDefault(require("./env/env"));
 const db_1 = require("./db/db");
 const app = (0, express_1.default)(); //Instantiate app
 const server = http_1.default.createServer(app);
-const allowedOrigins = ["http://localhost:3000", "https://admin.socket.io", "https://type-fight.vercel.app/"];
+const allowedOrigins = [
+    "http://localhost:3000",
+    "https://admin.socket.io",
+    "https://type-fight.vercel.app/",
+];
 const io = new socket_io_1.Server(server, {
-    cors: { origin: allowedOrigins,
-        credentials: true,
-    },
+    cors: { origin: allowedOrigins, credentials: true },
 });
-(0, db_1.connectDB)(); //Connect to the mongodb database 
+(0, db_1.connectDB)(); //Connect to the mongodb database
 app.use((0, cors_1.default)({ origin: allowedOrigins }));
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));

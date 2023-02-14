@@ -62,6 +62,6 @@ exports.router.post("/fighter/login", (req, res) => __awaiter(void 0, void 0, vo
         console.log(colors_1.default.bgRed(error));
     }
 }));
-exports.router.get("/auth", (0, authChecker_1.authChecker)(req, res, next), (req, res) => {
-    return res.send(req.user);
+exports.router.get("/auth", authChecker_1.authChecker, (req, res) => {
+    return res.send(req.cookies);
 });
