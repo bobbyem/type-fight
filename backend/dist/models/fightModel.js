@@ -8,7 +8,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const FightSchema = new mongoose_1.default.Schema({
     room: {
         type: String,
-        required: true
+        required: true,
     },
     finished: {
         type: Boolean,
@@ -16,15 +16,18 @@ const FightSchema = new mongoose_1.default.Schema({
     },
     state: {
         type: String,
-        default: "preStart" // "preStart", "waiting", "countDown", "started", "ended", "error"
+        default: "preStart", // "preStart", "waiting", "countDown", "started", "ended", "error"
+    },
+    startTime: {
+        type: Date,
     },
     creator: {
         type: String,
-        required: true
+        required: true,
     },
     fighters: {
         type: Array,
-        default: [] //Objects {userId, name, ready}
+        default: [], //Objects {userId, name, ready}
     },
     complexity: {
         type: Number,
@@ -37,11 +40,11 @@ const FightSchema = new mongoose_1.default.Schema({
     maxPlayers: {
         type: Number,
         required: true,
-        default: 0 // 0 Will be infinite amount of players
+        default: 0, // 0 Will be infinite amount of players
     },
     placement: {
         type: Array,
-        default: [] //I guesse these will be objects with userId and the finish time
+        default: [], //I guesse these will be objects with userId and the finish time
     },
 }, { timestamps: true });
 exports.Fight = mongoose_1.default.model("Fight", FightSchema);

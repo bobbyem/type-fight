@@ -12,11 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authChecker = void 0;
+exports.fighterGetter = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const env_1 = __importDefault(require("../env/env"));
 const fighterModel_1 = require("../models/fighterModel");
-function authChecker(req) {
+function fighterGetter(req) {
     return __awaiter(this, void 0, void 0, function* () {
         const { _tfToken: token } = req.cookies;
         if (token == null)
@@ -26,4 +26,4 @@ function authChecker(req) {
             return yield fighterModel_1.Fighter.findOne({ _id });
     });
 }
-exports.authChecker = authChecker;
+exports.fighterGetter = fighterGetter;

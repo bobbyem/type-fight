@@ -18,5 +18,6 @@
     "titleBar.inactiveBackground": "#50ea3799",
     "titleBar.inactiveForeground": "#15202b99"
   },
-  "peacock.color": "#50ea37"
+  "peacock.color": "#50ea37",
+  "eslint.workingDirectories": ["fontend", "backend"]
 }

@@ -30,6 +30,7 @@ function registerFighter(fighterData) {
         }
         catch (error) {
             console.log(colors_1.default.bgRed(error));
+            return { message: "Something went wrong" };
         }
     });
 }
@@ -38,8 +39,11 @@ function loginFighter(loginData) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             console.log(colors_1.default.bgYellow(`loginFighter:`));
-            const fighter = yield fighterModel_1.Fighter.collection.findOne({ email: loginData.email });
-            if (fighter && (yield bcryptjs_1.default.compare(loginData.password, fighter.password))) {
+            const fighter = yield fighterModel_1.Fighter.collection.findOne({
+                email: loginData.email,
+            });
+            if (fighter &&
+                (yield bcryptjs_1.default.compare(loginData.password, fighter.password))) {
                 const token = jsonwebtoken_1.default.sign({ _id: fighter._id }, env_1.default.jwt_secret);
                 return token;
             }

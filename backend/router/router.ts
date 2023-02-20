@@ -1,8 +1,8 @@
 import express from "express";
-import { createFight } from "../handlers/fightHandlers";
+import { createFight, getFights, joinFight } from "../handlers/fightHandlers";
 import colors from "colors";
 import { loginFighter, registerFighter } from "../handlers/fighterHandlers";
-import { authChecker } from "../helpers/authChecker";
+import { fighterGetter } from "../helpers/fighterGetter";
 import { UserRequest } from "../types/types";
 
 //Instance router
@@ -11,12 +11,33 @@ export const router = express.Router();
 //Fight routes
 //POST fight
 router.post("/fight", async (req, res) => {
+  //Auth check
+  // const fighter = await fighterGetter(req);
+  // if (!fighter) return res.sendStatus(500);
+
+  //Check required parameters
   const { complexity, maxPlayers } = req.body;
   if (!complexity) {
     return res.sendStatus(400);
   }
   const parameters = req.body;
   return res.send(await createFight(parameters));
+});
+
+//GET fights
+router.get("/fights", async (req, res) => {
+  // const fighter = await fighterGetter(req);
+  // if (!fighter) return res.sendStatus(500);
+
+  return res.json(await getFights());
+});
+
+//POST fight
+//Join fight
+router.post("/fight/join", async (req, res) => {
+  const { _id } = req.body;
+  if (!_id) return res.sendStatus(500);
+  return res.send(await joinFight(_id));
 });
 
 //Fighter routes
@@ -51,6 +72,9 @@ router.post("/fighter/login", async (req, res) => {
   }
 });
 
-router.get("/auth", authChecker, (req, res) => {
-  return res.send(req.cookies);
+router.get("/fighter", async (req, res) => {
+  const fighter = await fighterGetter(req);
+  if (!fighter) return res.sendStatus(500);
+  fighter.password = "*****";
+  return res.json(fighter);
 });

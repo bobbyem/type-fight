@@ -17,18 +17,36 @@ const express_1 = __importDefault(require("express"));
 const fightHandlers_1 = require("../handlers/fightHandlers");
 const colors_1 = __importDefault(require("colors"));
 const fighterHandlers_1 = require("../handlers/fighterHandlers");
-const authChecker_1 = require("../helpers/authChecker");
+const fighterGetter_1 = require("../helpers/fighterGetter");
 //Instance router
 exports.router = express_1.default.Router();
 //Fight routes
 //POST fight
 exports.router.post("/fight", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //Auth check
+    // const fighter = await fighterGetter(req);
+    // if (!fighter) return res.sendStatus(500);
+    //Check required parameters
     const { complexity, maxPlayers } = req.body;
     if (!complexity) {
         return res.sendStatus(400);
     }
     const parameters = req.body;
     return res.send(yield (0, fightHandlers_1.createFight)(parameters));
+}));
+//GET fights
+exports.router.get("/fights", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // const fighter = await fighterGetter(req);
+    // if (!fighter) return res.sendStatus(500);
+    return res.json(yield (0, fightHandlers_1.getFights)());
+}));
+//POST fight
+//Join fight
+exports.router.post("/fight/join", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { _id } = req.body;
+    if (!_id)
+        return res.sendStatus(500);
+    return res.send(yield (0, fightHandlers_1.joinFight)(_id));
 }));
 //Fighter routes
 //POST fighter
@@ -62,6 +80,10 @@ exports.router.post("/fighter/login", (req, res) => __awaiter(void 0, void 0, vo
         console.log(colors_1.default.bgRed(error));
     }
 }));
-exports.router.get("/auth", authChecker_1.authChecker, (req, res) => {
-    return res.send(req.cookies);
-});
+exports.router.get("/fighter", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const fighter = yield (0, fighterGetter_1.fighterGetter)(req);
+    if (!fighter)
+        return res.sendStatus(500);
+    fighter.password = "*****";
+    return res.json(fighter);
+}));
