@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { AuthType } from "../types/types";
 import { urls } from "../utils/url";
-import { toast, Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
 
 interface Data {
@@ -51,7 +50,6 @@ const Auth = () => {
             }
           });
       } catch (error) {
-        toast.error(error);
         console.log(error);
       }
     }
@@ -77,7 +75,6 @@ const Auth = () => {
             }
           });
       } catch (error) {
-        toast.error(error);
         console.log(error);
       }
     }
