@@ -11,8 +11,10 @@ const Fight = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [userInput, setUserInput] = useState<string>("");
   const [correct, setCorrect] = useState<boolean>(false);
-  const token = window.sessionStorage.getItem("_tftoken");
+  const [token, setToken] = useState<string | null>();
+
   useEffect(() => {
+    setToken(sessionStorage.getItem("_tftoken"));
     const connect = io(urls.api) ?? null;
     //Trigger on connect
     connect.on("connect", () => {

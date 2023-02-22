@@ -68,7 +68,10 @@ const Auth = () => {
           .then((resp) => resp.json())
           .then((data: Data) => {
             if (data.token) {
-              window.sessionStorage.setItem("_tftoken", data.token);
+              if (typeof window !== undefined) {
+                sessionStorage.setItem("_tftoken", data.token);
+              }
+
               (async () => router.push("/fights"))().catch((error) =>
                 console.error(error)
               );
