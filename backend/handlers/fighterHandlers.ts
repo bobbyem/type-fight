@@ -30,7 +30,12 @@ export async function loginFighter(loginData: LoginData) {
       (await bcrypt.compare(loginData.password, fighter.password))
     ) {
       const token = jwt.sign({ _id: fighter._id }, env.jwt_secret as Secret);
-      return token;
+      const payload = {
+        token: token,
+        fighter: { ...fighter, password: "*****" },
+      };
+      console.log(payload);
+      return payload;
     }
   } catch (error: any) {
     console.log(colors.bgRed(error));

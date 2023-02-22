@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import type { AuthType } from "../types/types";
+import type { AuthType, Fighter } from "../types/types";
 import { urls } from "../utils/url";
 import { useRouter } from "next/router";
 
 interface Data {
   token?: string;
   insertedId?: string;
+  fighter: Fighter;
 }
 
 const Auth = () => {
@@ -69,7 +70,12 @@ const Auth = () => {
           .then((data: Data) => {
             if (data.token) {
               if (typeof window !== undefined) {
+                console.log(data);
                 sessionStorage.setItem("_tftoken", data.token);
+                sessionStorage.setItem(
+                  "_tfFighter",
+                  JSON.stringify(data.fighter)
+                );
               }
 
               (async () => router.push("/fights"))().catch((error) =>

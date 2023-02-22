@@ -45,7 +45,12 @@ function loginFighter(loginData) {
             if (fighter &&
                 (yield bcryptjs_1.default.compare(loginData.password, fighter.password))) {
                 const token = jsonwebtoken_1.default.sign({ _id: fighter._id }, env_1.default.jwt_secret);
-                return token;
+                const payload = {
+                    token: token,
+                    fighter: Object.assign(Object.assign({}, fighter), { password: "*****" }),
+                };
+                console.log(payload);
+                return payload;
             }
         }
         catch (error) {
