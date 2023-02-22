@@ -8,7 +8,11 @@ const Fights = () => {
   const router = useRouter();
   const [fights, setFights] = useState<Fight[] | []>();
   useEffect(() => {
-    _fetchFights();
+    if (_checkForToken()) {
+      _fetchFights();
+      return;
+    }
+    router.push({ pathname: "/auth", query: { type: "login" } });
   }, []);
 
   function _fetchFights(): void {
@@ -50,8 +54,17 @@ const Fights = () => {
     }
   }
 
+  function _checkForToken(): boolean {
+    const token = sessionStorage.getItem("_tftoken");
+    if (!token) return false;
+    return true;
+  }
+
   return (
     <div className="flex flex-col gap-2">
+      <button onClick={() => router.push("/fightform")} className="border-2">
+        Create Fight
+      </button>
       {fights?.length > 0
         ? fights.map((fight: Fight) => (
             <FightItem key={fight._id} fight={fight} join={_handleJoin} />

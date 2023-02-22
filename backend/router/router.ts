@@ -57,6 +57,7 @@ router.post("/fighter/register", async (req, res) => {
 
 //Login fighter
 router.post("/fighter/login", async (req, res) => {
+  console.log(colors.bgCyan("/fighter/login"));
   const { email, password } = req.body;
   if (!email || !password) {
     return res.sendStatus(400);
@@ -64,7 +65,7 @@ router.post("/fighter/login", async (req, res) => {
   try {
     const token = await loginFighter(req.body);
     if (token) {
-      return res.cookie("_tfToken", token).send({ message: "ok" });
+      return res.cookie("_tfToken", token).json({ token });
     }
     return res.sendStatus(500);
   } catch (error: any) {

@@ -12,10 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.joinFight = exports.getFights = exports.createFight = void 0;
+exports.addPlayer = exports.joinFight = exports.getFights = exports.createFight = void 0;
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const colors_1 = __importDefault(require("colors"));
 const fightModel_1 = require("../models/fightModel");
 const wordGetter_1 = require("../helpers/wordGetter");
+const env_1 = __importDefault(require("../env/env"));
+const fighterModel_1 = require("../models/fighterModel");
 function createFight(parameters) {
     return __awaiter(this, void 0, void 0, function* () {
         const { complexity, maxPlayers, creator } = parameters;
@@ -67,3 +70,11 @@ function joinFight(_id) {
     });
 }
 exports.joinFight = joinFight;
+function addPlayer(token, room) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const _id = jsonwebtoken_1.default.verify(token, env_1.default.jwt_secret);
+        const fighter = yield fighterModel_1.Fighter.findOne({ _id });
+        yield fightModel_1.Fight.updateOne({ _id }, { $push: { fighters: fighter } });
+    });
+}
+exports.addPlayer = addPlayer;

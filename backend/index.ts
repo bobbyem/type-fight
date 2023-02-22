@@ -10,6 +10,7 @@ import { instrument } from "@socket.io/admin-ui";
 import { router } from "./router/router";
 import env from "./env/env";
 import { connectDB } from "./db/db";
+import { addPlayer } from "./handlers/fightHandlers";
 
 const app = express(); //Instantiate app
 const server = http.createServer(app);
@@ -47,6 +48,12 @@ io.on("connection", function (socket) {
     io.emit("pong", () => {
       data: "Pong";
     });
+  });
+
+  socket.on("join_room", async (room, token) => {
+    console.log(colors.bgBlue(`${socket.id} joined room ${room}`));
+    await addPlayer(token, room);
+    socket.join(room);
   });
 });
 

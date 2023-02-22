@@ -65,6 +65,7 @@ exports.router.post("/fighter/register", (req, res) => __awaiter(void 0, void 0,
 }));
 //Login fighter
 exports.router.post("/fighter/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(colors_1.default.bgCyan("/fighter/login"));
     const { email, password } = req.body;
     if (!email || !password) {
         return res.sendStatus(400);
@@ -72,7 +73,7 @@ exports.router.post("/fighter/login", (req, res) => __awaiter(void 0, void 0, vo
     try {
         const token = yield (0, fighterHandlers_1.loginFighter)(req.body);
         if (token) {
-            return res.cookie("_tfToken", token).send({ message: "ok" });
+            return res.cookie("_tfToken", token).json({ token });
         }
         return res.sendStatus(500);
     }

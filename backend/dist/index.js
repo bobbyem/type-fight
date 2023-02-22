@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -13,6 +22,7 @@ const admin_ui_1 = require("@socket.io/admin-ui");
 const router_1 = require("./router/router");
 const env_1 = __importDefault(require("./env/env"));
 const db_1 = require("./db/db");
+const fightHandlers_1 = require("./handlers/fightHandlers");
 const app = (0, express_1.default)(); //Instantiate app
 const server = http_1.default.createServer(app);
 const allowedOrigins = [
@@ -40,6 +50,11 @@ io.on("connection", function (socket) {
             data: "Pong";
         });
     });
+    socket.on("join_room", (room, token) => __awaiter(this, void 0, void 0, function* () {
+        console.log(colors_1.default.bgBlue(`${socket.id} joined room ${room}`));
+        yield (0, fightHandlers_1.addPlayer)(token, room);
+        socket.join(room);
+    }));
 });
 server.listen(process.env.PORT, () => {
     console.log(colors_1.default.bgGreen(`Server running on PORT: ${env_1.default.port} `));

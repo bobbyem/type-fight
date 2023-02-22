@@ -3,14 +3,23 @@ import { useEffect, useState } from "react";
 import { AuthType } from "../types/types";
 import { urls } from "../utils/url";
 import { toast, Toaster } from "react-hot-toast";
+import { useRouter } from "next/router";
 
 const Auth = () => {
-  const [type, setType] = useState<AuthType>("login");
+  const router = useRouter();
+  const [type, setType] = useState<AuthType>("register");
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [passwordRepeat, setRepeatPassword] = useState<string>("");
   const [valid, setValid] = useState(false);
+
+  useEffect(() => {
+    if (router.query.type) {
+      const { type } = router.query;
+      setType(type as AuthType);
+    }
+  }, [router.query]);
 
   useEffect(() => {
     setValid(_validate());
@@ -46,7 +55,12 @@ const Auth = () => {
           body: JSON.stringify({ email, password }),
         })
           .then((resp) => resp.json())
-          .then((data) => console.log(data));
+          .then((data) => {
+            if (data.token) {
+              sessionStorage.setItem("_tftoken", data.token);
+              router.push("/fights");
+            }
+          });
       } catch (error) {
         toast.error(error);
         console.log(error);
@@ -73,7 +87,16 @@ const Auth = () => {
   if (type === "login")
     return (
       <form className="m-1 flex flex-col">
-        <h1 className="text-lg font-bold">Register Account</h1>
+        <div className="flex">
+          <h1 className="text-lg font-bold">Login</h1>
+          <h1 className="text-lg font-bold">/</h1>
+          <h1
+            className="cursor-pointer text-lg font-bold text-fuchsia-400"
+            onClick={() => setType("register")}
+          >
+            Register
+          </h1>
+        </div>
         <label htmlFor="emailLogin">Email</label>
         <input
           type="email"
@@ -106,8 +129,17 @@ const Auth = () => {
 
   if (type === "register")
     return (
-      <form className="m-1 flex flex-col">
-        <h1 className="text-lg font-bold">Register Account</h1>
+      <form className="m-1 flex flex-col ">
+        <div className="flex">
+          <h1
+            className="cursor-pointer text-lg font-bold text-fuchsia-400"
+            onClick={() => setType("login")}
+          >
+            Login
+          </h1>
+          <h1 className="text-lg font-bold">/</h1>
+          <h1 className="cursor-pointer text-lg font-bold ">Register</h1>
+        </div>
         <label htmlFor="name">Name</label>
         <input
           type="text"
