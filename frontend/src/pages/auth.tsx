@@ -139,7 +139,6 @@ const Auth = () => {
         >
           Login
         </button>
-        <Toaster />
       </form>
     );
 
@@ -204,7 +203,6 @@ const Auth = () => {
         >
           Register
         </button>
-        <Toaster />
       </form>
     );
 };
