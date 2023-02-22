@@ -18,6 +18,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://admin.socket.io",
   "https://type-fight.vercel.app/",
+  "type-fight-git-develop-bobbyem.vercel.app",
 ];
 const io = new Server(server, {
   cors: { origin: allowedOrigins, credentials: true },
