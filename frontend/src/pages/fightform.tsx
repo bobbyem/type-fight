@@ -42,7 +42,7 @@ const FightForm = () => {
   }
 
   function _checkForToken(): boolean {
-    const token = sessionStorage.getItem("_tftoken");
+    const token = window.sessionStorage.getItem("_tftoken");
     if (!token) return false;
     return true;
   }
