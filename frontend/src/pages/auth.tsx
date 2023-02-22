@@ -1,9 +1,13 @@
-import { url } from "inspector";
 import { useEffect, useState } from "react";
-import { AuthType } from "../types/types";
+import type { AuthType } from "../types/types";
 import { urls } from "../utils/url";
 import { toast, Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
+
+interface Data {
+  token?: string;
+  insertedId?: string;
+}
 
 const Auth = () => {
   const router = useRouter();
@@ -23,12 +27,13 @@ const Auth = () => {
 
   useEffect(() => {
     setValid(_validate());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name, email, password, passwordRepeat]);
 
-  function _handleRegister(): void {
+  async function _handleRegister(): Promise<void> {
     if (valid) {
       try {
-        fetch(urls.api + "/fighter/register", {
+        await fetch(urls.api + "/fighter/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -36,7 +41,15 @@ const Auth = () => {
           body: JSON.stringify({ name, email, password }),
         })
           .then((resp) => resp.json())
-          .then((data) => console.log(data));
+          .then((data: Data) => {
+            if (data.insertedId) {
+              (async () =>
+                router.push({
+                  pathname: "/auth",
+                  query: { type: "login" },
+                }))().catch((error) => console.error(error));
+            }
+          });
       } catch (error) {
         toast.error(error);
         console.log(error);
@@ -44,10 +57,10 @@ const Auth = () => {
     }
   }
 
-  function _handleLogin(): void {
+  async function _handleLogin(): Promise<void> {
     if (valid) {
       try {
-        fetch(urls.api + "/fighter/login", {
+        await fetch(urls.api + "/fighter/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -55,10 +68,12 @@ const Auth = () => {
           body: JSON.stringify({ email, password }),
         })
           .then((resp) => resp.json())
-          .then((data) => {
+          .then((data: Data) => {
             if (data.token) {
               sessionStorage.setItem("_tftoken", data.token);
-              router.push("/fights");
+              (async () => router.push("/fights"))().catch((error) =>
+                console.error(error)
+              );
             }
           });
       } catch (error) {
@@ -119,7 +134,11 @@ const Auth = () => {
           type="button"
           className="border-2"
           disabled={!valid}
-          onClick={_handleLogin}
+          onClick={() => {
+            (async () => {
+              await _handleLogin();
+            })().catch((error) => console.error(error));
+          }}
         >
           Login
         </button>
@@ -180,7 +199,11 @@ const Auth = () => {
           type="button"
           className="border-2"
           disabled={!valid}
-          onClick={_handleRegister}
+          onClick={() => {
+            (async () => _handleRegister())().catch((error) =>
+              console.error(error)
+            );
+          }}
         >
           Register
         </button>

@@ -1,6 +1,10 @@
 import { useRouter } from "next/router";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { urls } from "../utils/url";
+
+interface Data {
+  insertedId: string;
+}
 
 const FightForm = () => {
   const router = useRouter();
@@ -13,11 +17,11 @@ const FightForm = () => {
     if (_checkForToken()) {
       return;
     }
-    router.push({ pathname: "/auth", query: { type: "login" } });
+    async () => router.push({ pathname: "/auth", query: { type: "login" } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function _handleSubmit(e: ChangeEvent<HTMLInputElement>) {
-    e.preventDefault();
+  async function _handleSubmit() {
     try {
       await fetch(`${urls.api}/fight`, {
         method: "POST",
@@ -27,9 +31,9 @@ const FightForm = () => {
         body: JSON.stringify(settings),
       })
         .then((resp) => resp.json())
-        .then((data) => {
+        .then((data: Data) => {
           if (data.insertedId) {
-            router.push("/fights");
+            async () => router.push("/fights");
           }
         });
     } catch (error) {
@@ -77,7 +81,7 @@ const FightForm = () => {
       <button
         disabled={settings.complexity <= 0}
         className="rounded border-b-4 border-blue-700 bg-blue-500 py-2 px-4 font-bold text-white hover:border-blue-500 hover:bg-blue-400"
-        onClick={(e) => _handleSubmit(e)}
+        onClick={() => _handleSubmit()}
       >
         Create Fight
       </button>

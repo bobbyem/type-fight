@@ -1,23 +1,34 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import FightItem from "../components/FightItem";
-import { Fight } from "../types/types";
+import type { Fight } from "../types/types";
 import { urls } from "../utils/url";
+
+interface Data {
+  room?: string;
+}
 
 const Fights = () => {
   const router = useRouter();
   const [fights, setFights] = useState<Fight[] | []>();
+
   useEffect(() => {
     if (_checkForToken()) {
-      _fetchFights();
+      //This is a IIFE - Immediately Invoked Function Expression
+      (async function IIFE() {
+        await _fetchFights();
+      })().catch((error) => console.log(error));
       return;
     }
-    router.push({ pathname: "/auth", query: { type: "login" } });
+    async () =>
+      await router.push({ pathname: "/auth", query: { type: "login" } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function _fetchFights(): void {
+  async function _fetchFights(): Promise<void> {
+    console.log("asdasd");
     try {
-      fetch(urls.api + "/fights", {
+      await fetch(urls.api + "/fights", {
         method: "GET",
       })
         .then((resp) => resp.json())
@@ -31,7 +42,7 @@ const Fights = () => {
 
   async function _handleJoin(_id: string): Promise<void> {
     try {
-      fetch(`${urls.api}/fight/join`, {
+      await fetch(`${urls.api}/fight/join`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -41,12 +52,14 @@ const Fights = () => {
         }),
       })
         .then((resp) => resp.json())
-        .then((data) => {
-          if (data.room) {
-            router.push({
-              pathname: "/fight",
-              query: { id: data.room },
-            });
+        .then((data: Data) => {
+          const { room } = data;
+          if (room) {
+            async () =>
+              router.push({
+                pathname: "/fight",
+                query: { id: data.room },
+              });
           }
         });
     } catch (error) {
@@ -62,7 +75,10 @@ const Fights = () => {
 
   return (
     <div className="flex flex-col gap-2">
-      <button onClick={() => router.push("/fightform")} className="border-2">
+      <button
+        onClick={() => async () => await router.push("/fightform")}
+        className="border-2"
+      >
         Create Fight
       </button>
       {fights?.length > 0

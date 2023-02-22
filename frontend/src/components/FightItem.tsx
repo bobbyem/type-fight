@@ -1,10 +1,9 @@
-import { Fight } from "../types/types";
+import type { Fight } from "../types/types";
 const FightItem = (props: {
   fight: Fight;
   join: (_id: string) => Promise<void>;
 }) => {
-  const { complexity, fighters, state, finished, maxPlayers, creator, _id } =
-    props.fight;
+  const { complexity, fighters, finished, maxPlayers, _id } = props.fight;
   return (
     <div className="flex flex-row gap-2 border-2">
       <button
