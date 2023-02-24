@@ -42,11 +42,9 @@ const FightForm = () => {
   }
 
   function _checkForToken(): boolean {
-    if (typeof window !== undefined) {
-      const token = sessionStorage.getItem("_tftoken");
-      if (!token) return false;
-      return true;
-    }
+    const token = sessionStorage.getItem("_tftoken");
+    if (!token) return false;
+    return true;
   }
 
   return (

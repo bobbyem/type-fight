@@ -68,11 +68,9 @@ const Fights = () => {
   }
 
   function _checkForToken(): boolean {
-    if (typeof window !== undefined) {
-      const token = sessionStorage.getItem("_tftoken");
-      if (!token) return false;
-      return true;
-    }
+    const token = sessionStorage.getItem("_tftoken");
+    if (!token) return false;
+    return true;
   }
 
   return (
@@ -83,7 +81,7 @@ const Fights = () => {
       >
         Create Fight
       </button>
-      {fights?.length > 0
+      {Array.isArray(fights) && fights?.length > 0
         ? fights.map((fight: Fight) => (
             <FightItem key={fight._id} fight={fight} join={_handleJoin} />
           ))
