@@ -10,7 +10,7 @@ import { instrument } from "@socket.io/admin-ui";
 import { router } from "./router/router";
 import env from "./env/env";
 import { connectDB } from "./db/db";
-import { addPlayer } from "./handlers/fightHandlers";
+import { addPlayer, removeFighter } from "./handlers/fightHandlers";
 
 const app = express(); //Instantiate app
 const server = http.createServer(app);
@@ -34,12 +34,19 @@ app.use(cookieParser());
 app.use("/", router);
 
 io.on("connection", function (socket) {
-  setInterval(
-    () =>
-      console.log(colors.bgYellow(`Connected to socket with ID: ${socket.id}`)),
-    60000
-  );
+  //Log connection id
+  console.log(colors.bgYellow(`Connected to socket with ID: ${socket.id}`));
 
+  //Disconnecting
+  socket.on("disconnecting", async (reason) => {
+    console.log(`socket ${socket.id} will disconnect due to ${reason}`);
+    const rooms = Array.from(socket.rooms);
+    await Promise.all(
+      rooms.map(async (room) => await removeFighter(socket.id, room))
+    );
+  });
+
+  //Disconnect
   socket.on("disconnect", (reason) => {
     console.log(`socket ${socket.id} disconnected due to ${reason}`);
   });
@@ -52,9 +59,8 @@ io.on("connection", function (socket) {
   });
 
   socket.on("join_room", async (room, token) => {
-    console.log(colors.bgCyan(token, room));
     console.log(colors.bgBlue(`${socket.id} joined room ${room}`));
-    await addPlayer(token, room);
+    await addPlayer(token, room, socket.id);
     socket.join(room);
   });
 });

@@ -41,7 +41,15 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cookie_parser_1.default)());
 app.use("/", router_1.router);
 io.on("connection", function (socket) {
-    setInterval(() => console.log(colors_1.default.bgYellow(`Connected to socket with ID: ${socket.id}`)), 60000);
+    //Log connection id
+    console.log(colors_1.default.bgYellow(`Connected to socket with ID: ${socket.id}`));
+    //Disconnecting
+    socket.on("disconnecting", (reason) => __awaiter(this, void 0, void 0, function* () {
+        console.log(`socket ${socket.id} will disconnect due to ${reason}`);
+        const rooms = Array.from(socket.rooms);
+        yield Promise.all(rooms.map((room) => __awaiter(this, void 0, void 0, function* () { return yield (0, fightHandlers_1.removeFighter)(socket.id, room); })));
+    }));
+    //Disconnect
     socket.on("disconnect", (reason) => {
         console.log(`socket ${socket.id} disconnected due to ${reason}`);
     });
@@ -52,9 +60,8 @@ io.on("connection", function (socket) {
         });
     });
     socket.on("join_room", (room, token) => __awaiter(this, void 0, void 0, function* () {
-        console.log(colors_1.default.bgCyan(token, room));
         console.log(colors_1.default.bgBlue(`${socket.id} joined room ${room}`));
-        yield (0, fightHandlers_1.addPlayer)(token, room);
+        yield (0, fightHandlers_1.addPlayer)(token, room, socket.id);
         socket.join(room);
     }));
 });

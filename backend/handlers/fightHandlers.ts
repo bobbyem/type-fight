@@ -43,8 +43,6 @@ export async function joinFight(_id: string) {
   console.log(colors.bgYellow(`joinFight:`));
   const fight = await Fight.findOne({ _id });
 
-  console.log(fight);
-
   if (fight) {
     return { room: _id };
   }
@@ -52,10 +50,64 @@ export async function joinFight(_id: string) {
   return { message: "Game is full or unavailable" };
 }
 
-export async function addPlayer(token: string, room: string) {
+export async function addPlayer(token: string, room: string, clientId: string) {
   const _id = jwt.verify(token, env.jwt_secret as string);
 
   const fighter = await Fighter.findOne({ _id });
+  const fight = await Fight.findOne({ _id: room });
 
-  await Fight.updateOne({ _id }, { $push: { fighters: fighter } });
+  //Check if we found what we need
+  if (!fighter || !fight) {
+    console.log(colors.red("Can't find either fight or fighter"));
+    return;
+  }
+
+  //TODO Check if fighter already added to fight
+  const match = fight.fighters.map((fighter) => fighter._id === _id);
+  if (fight.fighters.length > 0 && match) {
+    console.log(colors.bgRed("Fighter aldready added to fight"));
+    return;
+  }
+
+  await Fight.findOneAndUpdate(
+    { _id: room },
+    {
+      $push: {
+        fighters: {
+          name: fighter?.name,
+          _id: fighter?._id,
+          clientId: clientId,
+        },
+      },
+    }
+  ).then((value) => console.log(value));
+
+  return;
+}
+
+export async function removeFighter(clientId: string, room: string) {
+  console.log(colors.bgCyan(`removeFighter: `));
+  console.log(room);
+  const fight = await Fight.findOne({ _id: room });
+
+  if (!fight) {
+    console.log(
+      colors.bgRed(`removeFighter: could not find fight to remove player from`)
+    );
+  }
+
+  if (fight && fight.fighters.length > 0) {
+    console.log(colors.bgCyan(`removeFighter: finding match`));
+    const match = fight.fighters.map(
+      (fighter) => fighter.clientId === clientId
+    );
+    if (match) {
+      console.log(colors.bgCyan(`removeFighter: findOneAndUpdate`));
+      await Fight.findOneAndUpdate(
+        { _id: room },
+        { $pull: { fighters: { clientId: clientId } } }
+      );
+      return;
+    }
+  }
 }

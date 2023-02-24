@@ -2,10 +2,6 @@ import mongoose from "mongoose";
 
 const FightSchema = new mongoose.Schema(
   {
-    room: {
-      type: String,
-      required: true,
-    },
     finished: {
       type: Boolean,
       default: false,

@@ -6,10 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Fight = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const FightSchema = new mongoose_1.default.Schema({
-    room: {
-        type: String,
-        required: true,
-    },
     finished: {
         type: Boolean,
         default: false,

@@ -11,6 +11,7 @@ const Fight = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [userInput, setUserInput] = useState<string>("");
   const [correct, setCorrect] = useState<boolean>(false);
+  const [word, setWord] = useState<string | null>(null);
 
   useEffect(() => {
     const token = sessionStorage.getItem("_tftoken");
@@ -31,6 +32,11 @@ const Fight = () => {
       setCorrect(true);
     });
 
+    //Trigger when sent word
+    connect.on("word", (word: string) => {
+      setWord(word);
+    });
+
     return () => {
       connect.disconnect();
     };
@@ -49,7 +55,6 @@ const Fight = () => {
       <p>{`Connected: ${socket ? "👍" : "👎"}`}</p>
       <h1>{correct ? "🎉" : null}</h1>
       <label htmlFor="text">Input</label>
-      <h2>Hej hej</h2>
       <input
         type="text"
         name="text"

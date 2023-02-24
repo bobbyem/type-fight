@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addPlayer = exports.joinFight = exports.getFights = exports.createFight = void 0;
+exports.removeFighter = exports.addPlayer = exports.joinFight = exports.getFights = exports.createFight = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const colors_1 = __importDefault(require("colors"));
 const fightModel_1 = require("../models/fightModel");
@@ -62,7 +62,6 @@ function joinFight(_id) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(colors_1.default.bgYellow(`joinFight:`));
         const fight = yield fightModel_1.Fight.findOne({ _id });
-        console.log(fight);
         if (fight) {
             return { room: _id };
         }
@@ -70,11 +69,52 @@ function joinFight(_id) {
     });
 }
 exports.joinFight = joinFight;
-function addPlayer(token, room) {
+function addPlayer(token, room, clientId) {
     return __awaiter(this, void 0, void 0, function* () {
         const _id = jsonwebtoken_1.default.verify(token, env_1.default.jwt_secret);
         const fighter = yield fighterModel_1.Fighter.findOne({ _id });
-        yield fightModel_1.Fight.updateOne({ _id }, { $push: { fighters: fighter } });
+        const fight = yield fightModel_1.Fight.findOne({ _id: room });
+        //Check if we found what we need
+        if (!fighter || !fight) {
+            console.log(colors_1.default.red("Can't find either fight or fighter"));
+            return;
+        }
+        //TODO Check if fighter already added to fight
+        const match = fight.fighters.map((fighter) => fighter._id === _id);
+        if (fight.fighters.length > 0 && match) {
+            console.log(colors_1.default.bgRed("Fighter aldready added to fight"));
+            return;
+        }
+        yield fightModel_1.Fight.findOneAndUpdate({ _id: room }, {
+            $push: {
+                fighters: {
+                    name: fighter === null || fighter === void 0 ? void 0 : fighter.name,
+                    _id: fighter === null || fighter === void 0 ? void 0 : fighter._id,
+                    clientId: clientId,
+                },
+            },
+        }).then((value) => console.log(value));
+        return;
     });
 }
 exports.addPlayer = addPlayer;
+function removeFighter(clientId, room) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log(colors_1.default.bgCyan(`removeFighter: `));
+        console.log(room);
+        const fight = yield fightModel_1.Fight.findOne({ _id: room });
+        if (!fight) {
+            console.log(colors_1.default.bgRed(`removeFighter: could not find fight to remove player from`));
+        }
+        if (fight && fight.fighters.length > 0) {
+            console.log(colors_1.default.bgCyan(`removeFighter: finding match`));
+            const match = fight.fighters.map((fighter) => fighter.clientId === clientId);
+            if (match) {
+                console.log(colors_1.default.bgCyan(`removeFighter: findOneAndUpdate`));
+                yield fightModel_1.Fight.findOneAndUpdate({ _id: room }, { $pull: { fighters: { clientId: clientId } } });
+                return;
+            }
+        }
+    });
+}
+exports.removeFighter = removeFighter;
