@@ -15,13 +15,16 @@ const Fights = () => {
   useEffect(() => {
     if (_checkForToken()) {
       //This is a IIFE - Immediately Invoked Function Expression
-      (async function IIFE() {
+      (async () => {
         await _fetchFights();
       })().catch((error) => console.log(error));
       return;
     }
-    async () =>
-      await router.push({ pathname: "/auth", query: { type: "login" } });
+    (async () =>
+      await router.push({
+        pathname: "/auth",
+        query: { type: "login" },
+      }))().catch((error) => console.error(error));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -76,7 +79,11 @@ const Fights = () => {
   return (
     <div className="flex flex-col gap-2">
       <button
-        onClick={() => async () => await router.push("/fightform")}
+        onClick={() => {
+          (async () => await router.push("/fightform"))().catch((error) =>
+            console.error(error)
+          );
+        }}
         className="border-2"
       >
         Create Fight

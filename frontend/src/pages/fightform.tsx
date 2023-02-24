@@ -17,7 +17,10 @@ const FightForm = () => {
     if (_checkForToken()) {
       return;
     }
-    async () => router.push({ pathname: "/auth", query: { type: "login" } });
+    (async () =>
+      router.push({ pathname: "/auth", query: { type: "login" } }))().catch(
+      (error) => console.error(error)
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -33,7 +36,9 @@ const FightForm = () => {
         .then((resp) => resp.json())
         .then((data: Data) => {
           if (data.insertedId) {
-            async () => router.push("/fights");
+            (async () => await router.push("/fights"))().catch((error) =>
+              console.error(error)
+            );
           }
         });
     } catch (error) {
