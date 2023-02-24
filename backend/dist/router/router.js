@@ -17,17 +17,13 @@ const express_1 = __importDefault(require("express"));
 const fightHandlers_1 = require("../handlers/fightHandlers");
 const colors_1 = __importDefault(require("colors"));
 const fighterHandlers_1 = require("../handlers/fighterHandlers");
-const fighterGetter_1 = require("../helpers/fighterGetter");
 //Instance router
 exports.router = express_1.default.Router();
 //Fight routes
 //POST fight
 exports.router.post("/fight", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    //Auth check
-    // const fighter = await fighterGetter(req);
-    // if (!fighter) return res.sendStatus(500);
     //Check required parameters
-    const { complexity, maxPlayers } = req.body;
+    const { complexity, maxPlayers, creator } = req.body;
     if (!complexity) {
         return res.sendStatus(400);
     }
@@ -71,9 +67,9 @@ exports.router.post("/fighter/login", (req, res) => __awaiter(void 0, void 0, vo
         return res.sendStatus(400);
     }
     try {
-        const token = yield (0, fighterHandlers_1.loginFighter)(req.body);
-        if (token) {
-            return res.cookie("_tfToken", token).json({ token });
+        const payload = yield (0, fighterHandlers_1.loginFighter)(req.body);
+        if (payload) {
+            return res.json({ payload });
         }
         return res.sendStatus(500);
     }
@@ -81,10 +77,10 @@ exports.router.post("/fighter/login", (req, res) => __awaiter(void 0, void 0, vo
         console.log(colors_1.default.bgRed(error));
     }
 }));
-exports.router.get("/fighter", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const fighter = yield (0, fighterGetter_1.fighterGetter)(req);
-    if (!fighter)
-        return res.sendStatus(500);
-    fighter.password = "*****";
-    return res.json(fighter);
+exports.router.post("/fighter/name", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req.body._id) {
+        return res.sendStatus(400);
+    }
+    const name = yield (0, fighterHandlers_1.getFighterName)(req.body._id);
+    return res.json({ name });
 }));

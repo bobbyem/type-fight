@@ -1,7 +1,11 @@
 import express from "express";
 import { createFight, getFights, joinFight } from "../handlers/fightHandlers";
 import colors from "colors";
-import { loginFighter, registerFighter } from "../handlers/fighterHandlers";
+import {
+  getFighterName,
+  loginFighter,
+  registerFighter,
+} from "../handlers/fighterHandlers";
 import { fighterGetter } from "../helpers/fighterGetter";
 import { UserRequest } from "../types/types";
 
@@ -11,12 +15,8 @@ export const router = express.Router();
 //Fight routes
 //POST fight
 router.post("/fight", async (req, res) => {
-  //Auth check
-  // const fighter = await fighterGetter(req);
-  // if (!fighter) return res.sendStatus(500);
-
   //Check required parameters
-  const { complexity, maxPlayers } = req.body;
+  const { complexity, maxPlayers, creator } = req.body;
   if (!complexity) {
     return res.sendStatus(400);
   }
@@ -63,9 +63,9 @@ router.post("/fighter/login", async (req, res) => {
     return res.sendStatus(400);
   }
   try {
-    const token = await loginFighter(req.body);
-    if (token) {
-      return res.cookie("_tfToken", token).json({ token });
+    const payload = await loginFighter(req.body);
+    if (payload) {
+      return res.json({ payload });
     }
     return res.sendStatus(500);
   } catch (error: any) {
@@ -73,9 +73,11 @@ router.post("/fighter/login", async (req, res) => {
   }
 });
 
-router.get("/fighter", async (req, res) => {
-  const fighter = await fighterGetter(req);
-  if (!fighter) return res.sendStatus(500);
-  fighter.password = "*****";
-  return res.json(fighter);
+router.post("/fighter/name", async (req, res) => {
+  if (!req.body._id) {
+    return res.sendStatus(400);
+  }
+
+  const name = await getFighterName(req.body._id);
+  return res.json({ name });
 });

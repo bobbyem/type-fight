@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginFighter = exports.registerFighter = void 0;
+exports.getFighterName = exports.loginFighter = exports.registerFighter = void 0;
 const colors_1 = __importDefault(require("colors"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const fighterModel_1 = require("../models/fighterModel");
@@ -49,7 +49,6 @@ function loginFighter(loginData) {
                     token: token,
                     fighter: Object.assign(Object.assign({}, fighter), { password: "*****" }),
                 };
-                console.log(payload);
                 return payload;
             }
         }
@@ -59,3 +58,16 @@ function loginFighter(loginData) {
     });
 }
 exports.loginFighter = loginFighter;
+function getFighterName(_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const fighter = yield fighterModel_1.Fighter.findOne({ _id });
+            return fighter === null || fighter === void 0 ? void 0 : fighter.name;
+        }
+        catch (error) {
+            console.log(colors_1.default.bgRed(error));
+            return;
+        }
+    });
+}
+exports.getFighterName = getFighterName;

@@ -52,6 +52,7 @@ io.on("connection", function (socket) {
   });
 
   socket.on("join_room", async (room, token) => {
+    console.log(colors.bgCyan(token, room));
     console.log(colors.bgBlue(`${socket.id} joined room ${room}`));
     await addPlayer(token, room);
     socket.join(room);

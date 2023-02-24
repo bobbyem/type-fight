@@ -52,6 +52,7 @@ io.on("connection", function (socket) {
         });
     });
     socket.on("join_room", (room, token) => __awaiter(this, void 0, void 0, function* () {
+        console.log(colors_1.default.bgCyan(token, room));
         console.log(colors_1.default.bgBlue(`${socket.id} joined room ${room}`));
         yield (0, fightHandlers_1.addPlayer)(token, room);
         socket.join(room);

@@ -4,8 +4,12 @@ import { urls } from "../utils/url";
 import { useRouter } from "next/router";
 
 interface Data {
-  token?: string;
   insertedId?: string;
+  payload?: Payload;
+}
+
+interface Payload {
+  token?: string;
   fighter: Fighter;
 }
 
@@ -68,13 +72,13 @@ const Auth = () => {
         })
           .then((resp) => resp.json())
           .then((data: Data) => {
-            if (data.token) {
+            if (data.payload && data.payload.token) {
               if (typeof window !== undefined) {
                 console.log(data);
-                sessionStorage.setItem("_tftoken", data.token);
+                sessionStorage.setItem("_tftoken", data.payload.token);
                 sessionStorage.setItem(
                   "_tfFighter",
-                  JSON.stringify(data.fighter)
+                  JSON.stringify(data.payload.fighter)
                 );
               }
 

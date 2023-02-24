@@ -1,3 +1,4 @@
+import { Fighter } from "@/types/types";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { urls } from "../utils/url";
@@ -6,15 +7,29 @@ interface Data {
   insertedId: string;
 }
 
+interface Settings {
+  complexity: number;
+  maxPlayers: number;
+  creator: Fighter | null;
+}
+
 const FightForm = () => {
   const router = useRouter();
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<Settings>({
     complexity: 0,
     maxPlayers: 0,
+    creator: null,
   });
 
   useEffect(() => {
     if (_checkForToken()) {
+      const creator = sessionStorage.getItem("_tfFighter");
+      if (creator) {
+        setSettings({
+          ...settings,
+          creator: JSON.parse(creator) as Fighter,
+        });
+      }
       return;
     }
     (async () =>
@@ -53,7 +68,10 @@ const FightForm = () => {
   }
 
   return (
-    <form className="mb-4 rounded bg-white px-8 pt-6 pb-8 shadow-md">
+    <form
+      className="mb-4 rounded bg-white px-8 pt-6 pb-8 shadow-md"
+      onSubmit={(e) => e.preventDefault()}
+    >
       <h1>Create a fight</h1>
       <div className="mb-4">
         <label htmlFor="complexity">Word Complexity</label>

@@ -34,10 +34,19 @@ export async function loginFighter(loginData: LoginData) {
         token: token,
         fighter: { ...fighter, password: "*****" },
       };
-      console.log(payload);
       return payload;
     }
   } catch (error: any) {
     console.log(colors.bgRed(error));
+  }
+}
+
+export async function getFighterName(_id: string) {
+  try {
+    const fighter = await Fighter.findOne({ _id });
+    return fighter?.name;
+  } catch (error: any) {
+    console.log(colors.bgRed(error));
+    return;
   }
 }

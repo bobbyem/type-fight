@@ -29,7 +29,6 @@ const Fights = () => {
   }, []);
 
   async function _fetchFights(): Promise<void> {
-    console.log("asdasd");
     try {
       await fetch(urls.api + "/fights", {
         method: "GET",
@@ -58,11 +57,11 @@ const Fights = () => {
         .then((data: Data) => {
           const { room } = data;
           if (room) {
-            async () =>
+            (async () =>
               router.push({
                 pathname: "/fight",
                 query: { id: data.room },
-              });
+              }))().catch((error) => console.error(error));
           }
         });
     } catch (error) {
