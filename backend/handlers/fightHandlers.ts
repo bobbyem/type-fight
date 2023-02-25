@@ -51,6 +51,11 @@ export async function joinFight(_id: string) {
 }
 
 export async function addPlayer(token: string, room: string, clientId: string) {
+  console.log(
+    colors.bgCyan(
+      `addPlayer: token: ${token} room: ${room} clientId: ${clientId}`
+    )
+  );
   const _id = jwt.verify(token, env.jwt_secret as string);
 
   const fighter = await Fighter.findOne({ _id });
@@ -87,7 +92,7 @@ export async function addPlayer(token: string, room: string, clientId: string) {
 
 export async function removeFighter(clientId: string, room: string) {
   console.log(colors.bgCyan(`removeFighter: `));
-  console.log(room);
+  if (clientId === room) return;
   const fight = await Fight.findOne({ _id: room });
 
   if (!fight) {

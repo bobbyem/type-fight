@@ -71,6 +71,7 @@ function joinFight(_id) {
 exports.joinFight = joinFight;
 function addPlayer(token, room, clientId) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(colors_1.default.bgCyan(`addPlayer: token: ${token} room: ${room} clientId: ${clientId}`));
         const _id = jsonwebtoken_1.default.verify(token, env_1.default.jwt_secret);
         const fighter = yield fighterModel_1.Fighter.findOne({ _id });
         const fight = yield fightModel_1.Fight.findOne({ _id: room });
@@ -101,7 +102,8 @@ exports.addPlayer = addPlayer;
 function removeFighter(clientId, room) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(colors_1.default.bgCyan(`removeFighter: `));
-        console.log(room);
+        if (clientId === room)
+            return;
         const fight = yield fightModel_1.Fight.findOne({ _id: room });
         if (!fight) {
             console.log(colors_1.default.bgRed(`removeFighter: could not find fight to remove player from`));
