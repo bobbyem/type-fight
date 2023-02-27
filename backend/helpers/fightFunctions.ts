@@ -29,7 +29,13 @@ export async function addPlacement(token: string, gameId: string, time: Date) {
     timeStamp: time,
   };
 
-  if (fight?.placement.find((placementItem) => placementItem.fId.toString() === _id._id.toString())  return console.error(`addPlacement: user already registered`);
+  if (
+    fight?.placement.find(
+      (placementItem) => placementItem.fId.toString() === _id._id.toString()
+    )
+  ) {
+    return;
+  }
 
   fight.placement.push(placementItem);
   fight.save();
@@ -39,11 +45,11 @@ export async function addPlacement(token: string, gameId: string, time: Date) {
 }
 
 export async function addStartTime(gameId: string) {
-  await Fight.findOne({ _id: gameId }).then(doc => {
-    if (!doc) return 
+  await Fight.findOne({ _id: gameId }).then((doc) => {
+    if (!doc) return;
     if (doc && !doc.startTime) {
       doc.startTime = new Date();
-      doc.save()
-    };
-  })
+      doc.save();
+    }
+  });
 }
