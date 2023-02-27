@@ -31,7 +31,7 @@ export async function addPlacement(token: string, gameId: string, time: Date) {
 
   if (
     fight?.placement.find(
-      (placementItem) => placementItem.fId.toString() === _id._id.toString()
+      (placementItem) => placementItem.fId.toString() === _id.toString()
     )
   ) {
     return;

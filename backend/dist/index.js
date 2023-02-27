@@ -64,13 +64,19 @@ io.on("connection", function (socket) {
         if (!room || !token)
             return console.log(colors_1.default.bgRed(`join_room: missing parameters: room:${room} token:${token}`));
         console.log(colors_1.default.bgBlue(`${socket.id} joined room ${room}`));
+        const fight = yield (0, fightHandlers_1.getFight)(room);
+        if (fight && fight.state !== "prestart") {
+            console.log(colors_1.default.bgBlue("redirect"));
+            socket.to(socket.id).emit("redirect", "/fights");
+            return;
+        }
         yield (0, fightHandlers_1.addPlayer)(token, room, socket.id);
         socket.join(room);
     }));
     socket.on("start_game", (room) => __awaiter(this, void 0, void 0, function* () {
         console.log(`Starting game: ${room}`);
         yield (0, fightFunctions_1.updateFightState)(room, "countDown");
-        const fight = yield (0, fightHandlers_1.getFights)(room);
+        const fight = yield (0, fightHandlers_1.getFight)(room);
         let value = 10;
         const interval = setInterval(() => {
             value = value - 1;
@@ -90,7 +96,7 @@ io.on("connection", function (socket) {
     socket.on("user_input", (input, room, token) => __awaiter(this, void 0, void 0, function* () {
         if (!input || !room || !token)
             return console.log(colors_1.default.bgRed(`user_input: missing parameters input or room`));
-        const fight = yield (0, fightHandlers_1.getFights)(room);
+        const fight = yield (0, fightHandlers_1.getFight)(room);
         if (fight.word && fight.word === input) {
             const time = new Date();
             const completionTime = yield (0, fightFunctions_1.addPlacement)(token, room, time);

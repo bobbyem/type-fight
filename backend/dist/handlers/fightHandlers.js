@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeFighter = exports.addPlayer = exports.joinFight = exports.getFights = exports.createFight = void 0;
+exports.removeFighter = exports.addPlayer = exports.joinFight = exports.getFight = exports.getFights = exports.createFight = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const colors_1 = __importDefault(require("colors"));
 const fightModel_1 = require("../models/fightModel");
@@ -39,24 +39,13 @@ function createFight(parameters) {
     });
 }
 exports.createFight = createFight;
-function getFights(_id) {
+function getFights() {
     return __awaiter(this, void 0, void 0, function* () {
-        if (_id) {
-            try {
-                const fight = yield fightModel_1.Fight.findOne({ _id });
-                return fight;
-            }
-            catch (error) {
-                console.log(error);
-                return error;
-            }
-        }
         try {
             const fights = yield fightModel_1.Fight.find();
-            return fights.map((fight) => {
-                if (fight.finished) {
-                    return fight; //If game is finished return word - else censor it
-                }
+            return fights
+                .filter((f) => !f.finished && f.state === "preStart")
+                .map((fight) => {
                 fight.word = "******";
                 return fight;
             });
@@ -68,6 +57,19 @@ function getFights(_id) {
     });
 }
 exports.getFights = getFights;
+function getFight(_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const fight = yield fightModel_1.Fight.findOne({ _id });
+            return fight;
+        }
+        catch (error) {
+            console.log(error);
+            return;
+        }
+    });
+}
+exports.getFight = getFight;
 function joinFight(_id) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(colors_1.default.bgYellow(`joinFight:`));
@@ -92,7 +94,7 @@ function addPlayer(token, room, clientId) {
         }
         console.log();
         //TODO Check if fighter already added to fight
-        const match = fight.fighters.find((f) => f._id.toString() === _id._id.toString());
+        const match = fight.fighters.find((f) => f._id.toString() === _id.toString());
         console.log(match);
         if (fight.fighters.length > 0 && match) {
             console.log(colors_1.default.bgRed("Fighter aldready added to fight"));

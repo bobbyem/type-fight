@@ -1,10 +1,10 @@
 import jwt from "jsonwebtoken";
-import { CreateFightParameters } from "../types/types";
 import colors from "colors";
 import { Fight } from "../models/fightModel";
 import { wordGetter } from "../helpers/wordGetter";
 import env from "../env/env";
 import { Fighter } from "../models/fighterModel";
+import { CreateFightParameters } from "../types/types";
 
 export async function createFight(parameters: CreateFightParameters) {
   const { complexity, maxPlayers, creator } = parameters;
@@ -23,28 +23,29 @@ export async function createFight(parameters: CreateFightParameters) {
   }
 }
 
-export async function getFights(_id?: string) {
-  if (_id) {
-    try {
-      const fight = await Fight.findOne({ _id });
-      return fight;
-    } catch (error) {
-      console.log(error);
-      return error;
-    }
-  }
+export async function getFights() {
   try {
     const fights = await Fight.find();
-    return fights.map((fight) => {
-      if (fight.finished) {
-        return fight; //If game is finished return word - else censor it
-      }
-      fight.word = "******";
-      return fight;
-    });
+
+    return fights
+      .filter((f) => !f.finished && f.state === "preStart")
+      .map((fight) => {
+        fight.word = "******";
+        return fight;
+      });
   } catch (error) {
     console.log(error);
     return error;
+  }
+}
+
+export async function getFight(_id?: string): Promise<void | any> {
+  try {
+    const fight = await Fight.findOne({ _id });
+    return fight;
+  } catch (error: any) {
+    console.log(error);
+    return;
   }
 }
 
@@ -78,9 +79,7 @@ export async function addPlayer(token: string, room: string, clientId: string) {
 
   console.log();
   //TODO Check if fighter already added to fight
-  const match = fight.fighters.find(
-    (f) => f._id.toString() === _id._id.toString()
-  );
+  const match = fight.fighters.find((f) => f._id.toString() === _id.toString());
 
   console.log(match);
   if (fight.fighters.length > 0 && match) {

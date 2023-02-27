@@ -10,7 +10,12 @@ import { instrument } from "@socket.io/admin-ui";
 import { router } from "./router/router";
 import env from "./env/env";
 import { connectDB } from "./db/db";
-import { addPlayer, getFights, removeFighter } from "./handlers/fightHandlers";
+import {
+  addPlayer,
+  getFight,
+  getFights,
+  removeFighter,
+} from "./handlers/fightHandlers";
 import {
   addPlacement,
   addStartTime,
@@ -71,6 +76,14 @@ io.on("connection", function (socket) {
         )
       );
     console.log(colors.bgBlue(`${socket.id} joined room ${room}`));
+
+    const fight = await getFight(room);
+
+    if (fight && fight.state !== "prestart") {
+      console.log(colors.bgBlue("redirect"));
+      socket.to(socket.id).emit("redirect", "/fights");
+      return;
+    }
     await addPlayer(token, room, socket.id);
     socket.join(room);
   });
@@ -78,7 +91,7 @@ io.on("connection", function (socket) {
   socket.on("start_game", async (room) => {
     console.log(`Starting game: ${room}`);
     await updateFightState(room, "countDown");
-    const fight = await getFights(room);
+    const fight = await getFight(room);
     let value = 10;
     const interval = setInterval(() => {
       value = value - 1;
@@ -102,7 +115,7 @@ io.on("connection", function (socket) {
       return console.log(
         colors.bgRed(`user_input: missing parameters input or room`)
       );
-    const fight: Fight = await getFights(room);
+    const fight: Fight = await getFight(room);
     if (fight.word && fight.word === input) {
       const time = new Date();
       const completionTime = await addPlacement(token, room, time);

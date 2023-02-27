@@ -40,6 +40,7 @@ const Fight = () => {
       const token = sessionStorage.getItem("_tftoken");
       socket.emit("user_input", userInput, id, token);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, userInput]);
 
   useEffect(() => {
@@ -68,7 +69,18 @@ const Fight = () => {
         setCorrect(true);
         setCompletionTime(time);
       });
+
+      //Trigger when server wants to redirect client
+      socket.on("redirect", (url) => {
+        router.push(url);
+      });
+
+      //Trigger on server message
+      socket.on("message", (message) => {
+        alert(message);
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket]);
 
   return (

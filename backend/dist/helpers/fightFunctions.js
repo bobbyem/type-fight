@@ -44,7 +44,7 @@ function addPlacement(token, gameId, time) {
             fId: fighter === null || fighter === void 0 ? void 0 : fighter._id,
             timeStamp: time,
         };
-        if (fight === null || fight === void 0 ? void 0 : fight.placement.find((placementItem) => placementItem.fId.toString() === _id._id.toString())) {
+        if (fight === null || fight === void 0 ? void 0 : fight.placement.find((placementItem) => placementItem.fId.toString() === _id.toString())) {
             return;
         }
         fight.placement.push(placementItem);
