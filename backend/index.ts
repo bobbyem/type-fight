@@ -79,7 +79,7 @@ io.on("connection", function (socket) {
 
     const fight = await getFight(room);
 
-    if (fight && fight.state !== "prestart") {
+    if (fight && fight.state !== "preStart") {
       console.log(colors.bgBlue("redirect"));
       socket.to(socket.id).emit("redirect", "/fights");
       return;

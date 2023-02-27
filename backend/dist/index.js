@@ -65,7 +65,7 @@ io.on("connection", function (socket) {
             return console.log(colors_1.default.bgRed(`join_room: missing parameters: room:${room} token:${token}`));
         console.log(colors_1.default.bgBlue(`${socket.id} joined room ${room}`));
         const fight = yield (0, fightHandlers_1.getFight)(room);
-        if (fight && fight.state !== "prestart") {
+        if (fight && fight.state !== "preStart") {
             console.log(colors_1.default.bgBlue("redirect"));
             socket.to(socket.id).emit("redirect", "/fights");
             return;
