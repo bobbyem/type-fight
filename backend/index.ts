@@ -1,4 +1,4 @@
-import { UserRequest } from "./types/types";
+import { Fight, UserRequest } from "./types/types";
 import express from "express";
 import colors from "colors";
 import fs from "fs";
@@ -10,7 +10,12 @@ import { instrument } from "@socket.io/admin-ui";
 import { router } from "./router/router";
 import env from "./env/env";
 import { connectDB } from "./db/db";
-import { addPlayer, removeFighter } from "./handlers/fightHandlers";
+import { addPlayer, getFights, removeFighter } from "./handlers/fightHandlers";
+import {
+  addPlacement,
+  addStartTime,
+  updateFightState,
+} from "./helpers/fightFunctions";
 
 const app = express(); //Instantiate app
 const server = http.createServer(app);
@@ -59,9 +64,50 @@ io.on("connection", function (socket) {
   });
 
   socket.on("join_room", async (room, token) => {
+    if (!room || !token)
+      return console.log(
+        colors.bgRed(
+          `join_room: missing parameters: room:${room} token:${token}`
+        )
+      );
     console.log(colors.bgBlue(`${socket.id} joined room ${room}`));
     await addPlayer(token, room, socket.id);
     socket.join(room);
+  });
+
+  socket.on("start_game", async (room) => {
+    console.log(`Starting game: ${room}`);
+    await updateFightState(room, "countDown");
+    const fight = await getFights(room);
+    let value = 10;
+    const interval = setInterval(() => {
+      value = value - 1;
+      io.in(room).emit("countdown", value);
+      stop(value);
+      console.log(value);
+    }, 1000);
+
+    function stop(value: number) {
+      if (value <= 0) {
+        clearInterval(interval);
+        io.in(room).emit("word", fight.word);
+        addStartTime(room);
+        updateFightState(room, "running");
+      }
+    }
+  });
+
+  socket.on("user_input", async (input, room, token) => {
+    if (!input || !room || !token)
+      return console.log(
+        colors.bgRed(`user_input: missing parameters input or room`)
+      );
+    const fight: Fight = await getFights(room);
+    if (fight.word && fight.word === input) {
+      const time = new Date();
+      const completionTime = await addPlacement(token, room, time);
+      io.in(socket.id).emit("correct", completionTime);
+    }
   });
 });
 

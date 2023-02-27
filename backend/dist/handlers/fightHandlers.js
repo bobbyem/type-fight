@@ -39,8 +39,18 @@ function createFight(parameters) {
     });
 }
 exports.createFight = createFight;
-function getFights() {
+function getFights(_id) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (_id) {
+            try {
+                const fight = yield fightModel_1.Fight.findOne({ _id });
+                return fight;
+            }
+            catch (error) {
+                console.log(error);
+                return error;
+            }
+        }
         try {
             const fights = yield fightModel_1.Fight.find();
             return fights.map((fight) => {
@@ -62,7 +72,7 @@ function joinFight(_id) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(colors_1.default.bgYellow(`joinFight:`));
         const fight = yield fightModel_1.Fight.findOne({ _id });
-        if (fight) {
+        if (fight && fight.state === "preStart") {
             return { room: _id };
         }
         return { message: "Game is full or unavailable" };
@@ -80,10 +90,24 @@ function addPlayer(token, room, clientId) {
             console.log(colors_1.default.red("Can't find either fight or fighter"));
             return;
         }
+        console.log();
         //TODO Check if fighter already added to fight
-        const match = fight.fighters.map((fighter) => fighter._id === _id);
+        const match = fight.fighters.find((f) => f._id.toString() === _id._id.toString());
+        console.log(match);
         if (fight.fighters.length > 0 && match) {
             console.log(colors_1.default.bgRed("Fighter aldready added to fight"));
+            console.log(colors_1.default.bgRed("Updating fight id"));
+            yield fightModel_1.Fight.findOne({ _id: room })
+                .then((doc) => {
+                if (!doc || !clientId)
+                    return;
+                doc.fighters.map((fighter) => {
+                    if (fighter._id === _id)
+                        fighter.clientId = clientId;
+                });
+                doc === null || doc === void 0 ? void 0 : doc.save();
+            })
+                .catch((error) => console.error(error));
             return;
         }
         yield fightModel_1.Fight.findOneAndUpdate({ _id: room }, {
@@ -94,7 +118,7 @@ function addPlayer(token, room, clientId) {
                     clientId: clientId,
                 },
             },
-        }).then((value) => console.log(value));
+        });
         return;
     });
 }

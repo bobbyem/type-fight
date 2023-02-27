@@ -23,6 +23,7 @@ const router_1 = require("./router/router");
 const env_1 = __importDefault(require("./env/env"));
 const db_1 = require("./db/db");
 const fightHandlers_1 = require("./handlers/fightHandlers");
+const fightFunctions_1 = require("./helpers/fightFunctions");
 const app = (0, express_1.default)(); //Instantiate app
 const server = http_1.default.createServer(app);
 const allowedOrigins = [
@@ -60,9 +61,41 @@ io.on("connection", function (socket) {
         });
     });
     socket.on("join_room", (room, token) => __awaiter(this, void 0, void 0, function* () {
+        if (!room || !token)
+            return console.log(colors_1.default.bgRed(`join_room: missing parameters: room:${room} token:${token}`));
         console.log(colors_1.default.bgBlue(`${socket.id} joined room ${room}`));
         yield (0, fightHandlers_1.addPlayer)(token, room, socket.id);
         socket.join(room);
+    }));
+    socket.on("start_game", (room) => __awaiter(this, void 0, void 0, function* () {
+        console.log(`Starting game: ${room}`);
+        yield (0, fightFunctions_1.updateFightState)(room, "countDown");
+        const fight = yield (0, fightHandlers_1.getFights)(room);
+        let value = 10;
+        const interval = setInterval(() => {
+            value = value - 1;
+            io.in(room).emit("countdown", value);
+            stop(value);
+            console.log(value);
+        }, 1000);
+        function stop(value) {
+            if (value <= 0) {
+                clearInterval(interval);
+                io.in(room).emit("word", fight.word);
+                (0, fightFunctions_1.addStartTime)(room);
+                (0, fightFunctions_1.updateFightState)(room, "running");
+            }
+        }
+    }));
+    socket.on("user_input", (input, room, token) => __awaiter(this, void 0, void 0, function* () {
+        if (!input || !room || !token)
+            return console.log(colors_1.default.bgRed(`user_input: missing parameters input or room`));
+        const fight = yield (0, fightHandlers_1.getFights)(room);
+        if (fight.word && fight.word === input) {
+            const time = new Date();
+            const completionTime = yield (0, fightFunctions_1.addPlacement)(token, room, time);
+            io.in(socket.id).emit("correct", completionTime);
+        }
     }));
 });
 server.listen(process.env.PORT, () => {

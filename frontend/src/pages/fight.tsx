@@ -12,6 +12,8 @@ const Fight = () => {
   const [userInput, setUserInput] = useState<string>("");
   const [correct, setCorrect] = useState<boolean>(false);
   const [word, setWord] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [completionTime, setCompletionTime] = useState<number | null>(null);
 
   useEffect(() => {
     const token = sessionStorage.getItem("_tftoken");
@@ -19,22 +21,11 @@ const Fight = () => {
     //Trigger on connect
     connect.on("connect", () => {
       setSocket(connect);
-      connect.emit("join_room", id, token);
     });
 
     //Trigger on disconnect
     connect.on("disconnect", () => {
       setSocket(null);
-    });
-
-    //Trigger when sent correct
-    connect.on("correct", () => {
-      setCorrect(true);
-    });
-
-    //Trigger when sent word
-    connect.on("word", (word: string) => {
-      setWord(word);
     });
 
     return () => {
@@ -46,13 +37,59 @@ const Fight = () => {
   useEffect(() => {
     //Send user input to server for validation
     if (socket) {
-      socket.emit("userInput", userInput);
+      const token = sessionStorage.getItem("_tftoken");
+      socket.emit("user_input", userInput, id, token);
     }
   }, [socket, userInput]);
 
+  useEffect(() => {
+    if (id && socket) {
+      const token = sessionStorage.getItem("_tftoken");
+      socket.emit("join_room", id, token);
+      console.log(`join_room: ${id}`);
+    }
+  }, [id, socket]);
+
+  useEffect(() => {
+    if (socket) {
+      //Trigger when sent word
+      socket.on("word", (word: string) => {
+        setWord(word);
+      });
+
+      //Trigger on countdown
+      socket.on("countdown", (value) => {
+        console.log(`Setting countdown: ${value}`);
+        setCountdown(value);
+      });
+
+      //Trigger when sent correct
+      socket.on("correct", (time) => {
+        setCorrect(true);
+        setCompletionTime(time);
+      });
+    }
+  }, [socket]);
+
   return (
     <div className="flex flex-col flex-wrap p-8">
+      <button
+        onClick={() => {
+          if (socket) {
+            socket.emit("start_game", id);
+          }
+        }}
+      >
+        Start
+      </button>
+      <h1>{countdown ? countdown : null}</h1>
+      <h1>
+        {completionTime
+          ? `Completiontime: ${completionTime / 1000} seconds`
+          : null}
+      </h1>
       <p>{`Connected: ${socket ? "👍" : "👎"}`}</p>
+      <h1>Type: {word ? word : null}</h1>
       <h1>{correct ? "🎉" : null}</h1>
       <label htmlFor="text">Input</label>
       <input

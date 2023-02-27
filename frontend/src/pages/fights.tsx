@@ -6,6 +6,7 @@ import { urls } from "../utils/url";
 
 interface Data {
   room?: string;
+  message?: string;
 }
 
 const Fights = () => {
@@ -55,7 +56,7 @@ const Fights = () => {
       })
         .then((resp) => resp.json())
         .then((data: Data) => {
-          const { room } = data;
+          const { room, message } = data;
           if (room) {
             (async () =>
               router.push({
@@ -63,6 +64,8 @@ const Fights = () => {
                 query: { id: data.room },
               }))().catch((error) => console.error(error));
           }
+
+          if (message) alert(message);
         });
     } catch (error) {
       console.log(error);

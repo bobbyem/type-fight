@@ -23,7 +23,16 @@ export async function createFight(parameters: CreateFightParameters) {
   }
 }
 
-export async function getFights() {
+export async function getFights(_id?: string) {
+  if (_id) {
+    try {
+      const fight = await Fight.findOne({ _id });
+      return fight;
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  }
   try {
     const fights = await Fight.find();
     return fights.map((fight) => {
@@ -43,7 +52,7 @@ export async function joinFight(_id: string) {
   console.log(colors.bgYellow(`joinFight:`));
   const fight = await Fight.findOne({ _id });
 
-  if (fight) {
+  if (fight && fight.state === "preStart") {
     return { room: _id };
   }
 
@@ -67,10 +76,25 @@ export async function addPlayer(token: string, room: string, clientId: string) {
     return;
   }
 
+  console.log();
   //TODO Check if fighter already added to fight
-  const match = fight.fighters.map((fighter) => fighter._id === _id);
+  const match = fight.fighters.find(
+    (f) => f._id.toString() === _id._id.toString()
+  );
+
+  console.log(match);
   if (fight.fighters.length > 0 && match) {
     console.log(colors.bgRed("Fighter aldready added to fight"));
+    console.log(colors.bgRed("Updating fight id"));
+    await Fight.findOne({ _id: room })
+      .then((doc) => {
+        if (!doc || !clientId) return;
+        doc.fighters.map((fighter) => {
+          if (fighter._id === _id) fighter.clientId = clientId;
+        });
+        doc?.save();
+      })
+      .catch((error) => console.error(error));
     return;
   }
 
@@ -85,7 +109,7 @@ export async function addPlayer(token: string, room: string, clientId: string) {
         },
       },
     }
-  ).then((value) => console.log(value));
+  );
 
   return;
 }
